@@ -14,9 +14,9 @@
 class Config {
     public static $db = [
         "host" => "localhost",
-        "port" => 5432,
-        "user" => "mlh2rtk_a",
-        "pass" => "Spring2024",
-        "database" => "mlh2rtk_a"
+        "port" => 3306,
+        "user" => "root",
+        "pass" => "",
+        "database" => "test"
     ];
 }

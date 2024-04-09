@@ -21,7 +21,7 @@ class Database {
         $password = Config::$db["pass"];
         $port = Config::$db["port"];
 
-        $this->dbConnector = new mysqli("host=$host port=$port dbname=$database user=$user password=$password");
+        $this->dbConnector = new mysqli($host, $user, $password, $database, $port);
 
     }
     public function make_tables(){
