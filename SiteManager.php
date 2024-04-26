@@ -28,18 +28,29 @@ class SiteManager{
             case 'login':
 
                 break;
+            case 'home':
+                $this->split_screen_customer();
         }
     }
+    function split_screen_customer(){
+        include('pages/customer_signup.php');
+    }
+
+    /* the beginning of the handling of business user
+
+    //////////////////////////////////////////////
+    //////////////////////////////////////////////
+    /////////////////////////////////////////////
+    */
     function handle_business(){
         $command = isset($_GET['command']) ?  $_GET['command'] : 'home';
         switch ($command){
-            case 'signup':
-
-                break;
-            case 'login':
-
-                break;
+            case 'home':
+                $this->split_screen_business();
         }
+    }
+    function split_screen_business(){
+        include('pages/business_signup.php');
     }
     /**
      * Write Review
