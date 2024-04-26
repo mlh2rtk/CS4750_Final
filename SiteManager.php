@@ -3,8 +3,9 @@ class SiteManager{
     public $db;
     public function __construct(){
         $this->db = new Database();
+        $this->db->delete_cust();
         $this->db->make_tables();
-        $this->db = $this->db->dbConnector;
+       
     }
     public function run() {
         $user = isset($_GET['user']) ?  $_GET['user'] : 'welcome';
@@ -23,14 +24,37 @@ class SiteManager{
         $command = isset($_GET['command']) ?  $_GET['command'] : 'home';
         switch ($command){
             case 'signup':
-
+                $this->customer_signup();
                 break;
             case 'login':
-
+                $this->customer_login();
                 break;
             case 'home':
                 $this->split_screen_customer();
+                break;
+            case 'homepage':
+
+                break;
         }
+    }
+    function customer_signup(){
+        $statement = $this->db->dbConnector->prepare("INSERT INTO Customer(first_name, last_name, username, pass, email, phone)
+                                   VALUES (?, ?, ?, ?, ?, ?);");
+        $pass = password_hash($_POST['signupPassword'], PASSWORD_DEFAULT);
+        $statement->bind_param('ssssss', $_POST['firstName'], $_POST['lastName'], $_POST['signupUsername'], $pass, $_POST['email'], $_POST['phone']);
+        $statement->execute();
+        $statement->close();
+        header('Location: ?user=customer&command=homepage');
+
+    }
+    function customer_login(){
+        $statement = $this->db->dbConnector->prepare("SELECT pass FROM Customer WHERE username=? ;");
+        $statement->bind_param('s',$_POST['loginUsername']);
+        $statement->bind_result($pass);
+        $statement->execute();
+        $statement->fetch();
+        var_dump($pass);
+        var_dump(password_verify($_POST['loginPassword'], $pass));
     }
     function split_screen_customer(){
         include('pages/customer_signup.php');
@@ -88,23 +112,7 @@ class SiteManager{
         $stmt->close();
         return $drink;
     }
-    
-    function customer_submit(){
-
-    }
-    function customer_signup(){
-        include('pages/customer_signup');
-    }
-    function business_submit(){
-
-    }
     function welcome(){
         include('pages/welcome.php');
-    }
-    function business_signup(){
-        include('pages/business_signup.php');
-    }
-    function signup(){
-        include('pages/signup.php');
     }
 }

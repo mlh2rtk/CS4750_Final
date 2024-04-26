@@ -46,11 +46,11 @@
             <form id="loginForm" action="?command=login&user=customer" method="post">
                 <div class="form-group">
                     <label for="loginUsername">Username</label>
-                    <input type="text" class="form-control" id="loginUsername" placeholder="Enter username" required>
+                    <input type="text" class="form-control" id="loginUsername" name='loginUsername' placeholder="Enter username" required>
                 </div>
                 <div class="form-group">
                     <label for="loginPassword">Password</label>
-                    <input type="password" class="form-control" id="loginPassword" placeholder="Enter password" required>
+                    <input type="password" class="form-control" id="loginPassword" name='loginPassword' placeholder="Enter password" required>
                 </div>
                 <button type="submit" class="btn btn-primary">Login</button>
             </form>
@@ -61,27 +61,27 @@
             <form id="signupForm" action="?command=signup&user=customer" method="post">
                 <div class="form-group">
                     <label for="firstName">First Name</label>
-                    <input type="text" class="form-control" id="firstName" placeholder="Enter first name" required>
+                    <input type="text" class="form-control" id="firstName" name='firstName' placeholder="Enter first name" required>
                 </div>
                 <div class="form-group">
                     <label for="lastName">Last Name</label>
-                    <input type="text" class="form-control" id="lastName" placeholder="Enter last name" required>
+                    <input type="text" class="form-control" id="lastName" name='lastName'placeholder="Enter last name" required>
                 </div>
                 <div class="form-group">
                     <label for="signupUsername">Username</label>
-                    <input type="text" class="form-control" id="signupUsername" placeholder="Enter username" required>
+                    <input type="text" class="form-control" id="signupUsername" name='signupUsername' placeholder="Enter username" required>
                 </div>
                 <div class="form-group">
                     <label for="signupPassword">Password</label>
-                    <input type="password" class="form-control" id="signupPassword" placeholder="Enter password" required>
+                    <input type="password" class="form-control" id="signupPassword" name='signupPassword' placeholder="Enter password" required>
                 </div>
                 <div class="form-group">
                     <label for="phoneNumber">Phone Number</label>
-                    <input type="tel" class="form-control" id="phoneNumber" placeholder="Enter phone number" required>
+                    <input type="tel" class="form-control" id="phoneNumber" name='phone' placeholder="Enter phone number" required>
                 </div>
                 <div class="form-group">
                     <label for="email">Email</label>
-                    <input type="email" class="form-control" id="email" placeholder="Enter email" required>
+                    <input type="email" class="form-control" id="email" name='email' placeholder="Enter email" required>
                 </div>
                 <button type="submit" class="btn btn-primary">Sign Up</button>
             </form>
