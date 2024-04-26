@@ -3,28 +3,42 @@ class SiteManager{
     public $db;
     public function __construct(){
         $this->db = new Database();
+        $this->db->make_tables();
+        $this->db = $this->db->dbConnector;
     }
     public function run() {
-
-        $command = isset($_GET['command']) ? $_GET['command'] : 'welcome';
-
-        switch ($command) {
-            case 'customer_signup':
-                $this->customer_signup();
+        $user = isset($_GET['user']) ?  $_GET['user'] : 'welcome';
+        switch ($user) {
+            case 'customer':
+                $this->handle_customer();
                 break;
-            case 'business_signup':
-                $this->business_signup();
-                break;
-            case 'signup':
-                $this->signup();
-                break;
-            case 'business_submit':
-                $this->business_submit();
-            case 'customer_submit':
-                $this->customer_submit();
+            case 'business':
+                $this->handle_business();
             default:
                 $this->welcome();
 
+        }
+    }
+    function handle_customer(){
+        $command = isset($_GET['command']) ?  $_GET['command'] : 'home';
+        switch ($command){
+            case 'signup':
+
+                break;
+            case 'login':
+
+                break;
+        }
+    }
+    function handle_business(){
+        $command = isset($_GET['command']) ?  $_GET['command'] : 'home';
+        switch ($command){
+            case 'signup':
+
+                break;
+            case 'login':
+
+                break;
         }
     }
     /**
@@ -39,7 +53,7 @@ class SiteManager{
      * @return bool True if the review was successfully added, false otherwise.
      */
     public function writeReview($customerUsername, $shopUsername, $reviewText, $rating) {
-        $stmt = $this->dbConnector->prepare("INSERT INTO Reviews (c_username, shop_username, review_text, rating) VALUES ($customerUsername, ?, ?, ?)");
+        $stmt = $this->dbConnector->prepare("INSERT INTO Reviews (c_username, shop_username, review_text, rating) VALUES (?, ?, ?, ?)");
         $stmt->bind_param("sssi", $customerUsername, $shopUsername, $reviewText, $rating);
         $result = $stmt->execute();
         $stmt->close();
