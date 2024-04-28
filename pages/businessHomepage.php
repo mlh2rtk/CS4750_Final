@@ -72,7 +72,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["editButton"])) {
     // Update the Time_of_Operation table in the database
     $sql = "REPLACE INTO Time_of_operation (shop_username, dayOfWeek, startTime, endTime) VALUES (?, ?, ?, ?)";
     $stmt = $this->db->dbConnector->prepare($sql);
-    $stmt->bind_param("ssii", $this->loggedInUser, $dayOfWeek, $startTime, $endTime);
+    $stmt->bind_param("ssss", $_SESSION['loggedInUser'], $dayOfWeek, $startTime, $endTime);
     $stmt->execute();
     $stmt->close();
 }
@@ -80,7 +80,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["editButton"])) {
 <div class="form-container">
     <h2 class="form-title">Business Time of Operation</h2>
     <?php
-    $shop_username = $this->loggedInUser; // Replace with the actual shop username
+    $shop_username = $_SESSION['loggedInUser']; // Replace with the actual shop username
     $daysOfWeek = array("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday");
 
     foreach ($daysOfWeek as $day) {
@@ -89,8 +89,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["editButton"])) {
         $stmt = $this->db->dbConnector->prepare($sql);
         $stmt->bind_param("ss", $shop_username, $day);
         $stmt->execute();
-        $startTime = NULL;
-        $endTime = NULL;
         $stmt->bind_result($startTime, $endTime);
 
         // Fetch the result
@@ -103,12 +101,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["editButton"])) {
         echo "<strong>$day:</strong> ";
         if ($startTime !== null && $endTime !== null) {
             // Format the time strings as desired
-            $startTimeFormatted = date("h:i A", strtotime("$startTime:00"));
-            $endTimeFormatted = date("h:i A", strtotime("$endTime:00"));
+            $startTimeFormatted = date("h:i A", strtotime("$startTime"));
+            $endTimeFormatted = date("h:i A", strtotime("$endTime"));
             echo "$startTimeFormatted - $endTimeFormatted";
         } else {
             echo "Closed";
         }
+        $startTime = NULL;
+        $endTime = NULL;
         echo "</div>"; // Close sql-data div
 
         // Display input fields for editing start and end times

@@ -33,7 +33,7 @@ class Database {
         $res = $this->dbConnector->query(  "CREATE TABLE IF NOT EXISTS `Location`(location_id INT AUTO_INCREMENT, state CHAR(2) NOT NULL , zip_code INT NOT NULL CHECK ( zip_code between 0 and 99999) ,street_address VARCHAR(255) NOT NULL, city VARCHAR(100) NOT NULL, PRIMARY KEY(location_id));");
         /// Repeated 3
         $res = $this->dbConnector->query(  "CREATE TABLE IF NOT EXISTS `Shop_Owner` (shop_username VARCHAR(50) NOT NULL, location_id INT, password VARCHAR(500) NOT NULL, PRIMARY KEY(shop_username), FOREIGN KEY (location_id) REFERENCES Location(location_id));");
-        $res = $this->dbConnector->query(  "CREATE TABLE IF NOT EXISTS `Time_of_operation`( shop_username VARCHAR(50) NOT NULL, dayOfWeek VARCHAR(5) NOT NULL, startTime INT, endTime INT, PRIMARY KEY(shop_username, dayOfWeek), FOREIGN KEY (shop_username) REFERENCES Shop_Owner(shop_username));");
+        $res = $this->dbConnector->query(  "CREATE TABLE IF NOT EXISTS `Time_of_operation`( shop_username VARCHAR(50) NOT NULL, dayOfWeek VARCHAR(10) NOT NULL, startTime TIME, endTime TIME, PRIMARY KEY(shop_username, dayOfWeek), FOREIGN KEY (shop_username) REFERENCES Shop_Owner(shop_username));");
         $res = $this->dbConnector->query(  "CREATE TABLE IF NOT EXISTS Location_Parent_Company (
             parent_name VARCHAR(50),
             location_id INT,
