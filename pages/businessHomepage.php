@@ -76,7 +76,24 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["editButton"])) {
     $stmt->execute();
     $stmt->close();
 }
+
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["editLocationButton"])) {
+    // Retrieve the form data
+    $streetAddress = $_POST['streetAddress'];
+    $city = $_POST['city'];
+    $state = $_POST['state'];
+    $zip = $_POST['zip'];
+
+    // Perform any necessary validation or database updates here
+    // For this example, we'll just display the updated location
+    $sql = "REPLACE INTO location (location_id, state, zip_code, street_address, city) VALUES (?, ?, ?, ?, ?)";
+    $stmt = $this->db->dbConnector->prepare($sql);
+    $stmt->bind_param("isiss", $location_id, $state, $zip, $streetAddress, $city);
+    $stmt->execute();
+    $stmt->close();
+}
 ?>
+<!-- Business Time of Operation-->
 <div class="form-container">
     <h2 class="form-title">Business Time of Operation</h2>
     <?php
@@ -125,6 +142,65 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["editButton"])) {
         echo "<button class='toggle-edit'>Open</button>";
         echo "</div>"; // Close day-operation div
     }
+    ?>
+</div>
+<!-- Update location -->
+<div class="form-container">
+    <h2 class="form-title">Business Location</h2>
+    <?php
+    //$location_id = $_SESSION['locationID'];
+    // Prepare and execute SQL query to retrieve address for the current location_id
+    $sql = "SELECT state, zip_code, street_address, city FROM location JOIN location_parent_company ON location.location_id=location_parent_company.location_id WHERE parent_name = ?";
+    $stmt = $this->db->dbConnector->prepare($sql);
+    $stmt->bind_param("i", $_SESSION['loggedInUser']);
+    $stmt->execute();
+    $stmt->bind_result($state, $zip, $streetAddress, $city);
+
+    // Fetch the result
+    $stmt->fetch();
+    $stmt->close();
+    ?>
+    <form method="post" action=''>
+        <label for="streetAddress">Street Address:</label><br>
+        <input type="text" id="streetAddress" name="streetAddress" value="<?php echo $streetAddress; ?>"><br><br>
+
+        <label for="city">City:</label><br>
+        <input type="text" id="city" name="city" value="<?php echo $city; ?>"><br><br>
+
+        <label for="state">State:</label><br>
+        <input type="text" id="state" name="state" value="<?php echo $state; ?>"><br><br>
+
+        <label for="zip">ZIP Code:</label><br>
+        <input type="text" id="zip" name="zip" value="<?php echo $zip; ?>"><br><br>
+
+        <input type="submit" name="editLocationButton" value="Update">
+    </form>
+</div>
+<!-- Update name of business -->
+<div class="form-container">
+    <h2 class="form-title">Business Name</h2>
+    <form method="post" action=''>
+        <label for="businessName">Business Name:</label><br>
+        <input type="text" id="businessName" name="businessName" value="<?php echo $_SESSION['loggedInUser']; ?>"><br><br>
+        <input type="submit" name="editNameButton" value="Update">
+    </form>
+</div>
+<!-- See reviews -->
+<div class="form-container">
+    <h2 class="form-title">Reviews</h2>
+    <?php
+    // Prepare and execute SQL query to retrieve reviews for the current shop
+    $sql = "SELECT review_text, rating FROM reviews WHERE shop_username = ?";
+    $stmt = $this->db->dbConnector->prepare($sql);
+    $stmt->bind_param("i", $_SESSION['loggedInUser']);
+    $stmt->execute();
+    $stmt->bind_result($review_text, $rating);
+
+    // Fetch the result
+    while ($stmt->fetch()){
+        echo "<div><div>$review_text</div><div>$rating</div></div>";
+    }
+    $stmt->close();
     ?>
 </div>
 </body>
