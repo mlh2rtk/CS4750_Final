@@ -37,7 +37,7 @@ class SiteManager{
                 $this->split_screen_customer();
                 break;
             case 'homepage':
-
+                include("pages/customerHomepage.php");
                 break;
         }
     }
