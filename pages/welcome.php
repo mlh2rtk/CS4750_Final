@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CvilleCoffee - Split Screen Links</title>
+    <title>CoffeeDB</title>
     <style>
         body, html {
             height: 100%;
@@ -43,7 +43,7 @@
 </head>
 <body>
 <div class="header">
-    <h1>Welcome to CvilleCoffee</h1>
+    <h1> Welcome to CoffeeDB</h1>
 </div>
 <div class="container">
     <a href="?user=customer" class="link link-customer">Customer</a>

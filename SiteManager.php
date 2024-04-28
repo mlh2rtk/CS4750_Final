@@ -1,6 +1,8 @@
 <?php
 class SiteManager{
     public $db;
+    public $loggedInUser;
+
     public function __construct(){
         $this->db = new Database();
         //$this->db->delete_cust();
@@ -15,11 +17,14 @@ class SiteManager{
                 break;
             case 'business':
                 $this->handle_business();
+                break;
             default:
                 $this->welcome();
+                break;
 
         }
     }
+
     function handle_customer(){
         $command = isset($_GET['command']) ?  $_GET['command'] : 'home';
         switch ($command){
@@ -44,6 +49,7 @@ class SiteManager{
         $statement->bind_param('ssssss', $_POST['firstName'], $_POST['lastName'], $_POST['signupUsername'], $pass, $_POST['email'], $_POST['phone']);
         $statement->execute();
         $statement->close();
+        $this->loggedInUser = $_POST['signupUsername'];
         header('Location: ?user=customer&command=homepage');
 
     }
@@ -57,12 +63,12 @@ class SiteManager{
         //correct password
         if(password_verify($_POST['loginPassword'], $pass) == true)
         {
+            $this->loggedInUser = $_POST['loginUsername'];
             header("Location: ?user=customer&command=homepage");
         }
         else
         {
             header("Location: ?user=customer&error=incorrect_credentials");
-            exit();
         }
     }
     function split_screen_customer(){
@@ -88,7 +94,7 @@ class SiteManager{
                 $this->split_screen_business();
                 break;
             case 'homepage':
-
+                include("pages/businessHomepage.php");
                 break;
         }
     }
@@ -117,6 +123,7 @@ class SiteManager{
         $shop_owner_statement->close();
         $location_parent_statement->close();
 
+        $this->loggedInUser = $_POST['signupUsername'];
         header('Location: ?user=business&command=homepage');
 
     }
@@ -130,12 +137,12 @@ class SiteManager{
         //correct password
         if(password_verify($_POST['loginPassword'], $pass) == true)
         {
+            $this->loggedInUser = $_POST['loginUsername'];
             header("Location: ?user=business&command=homepage");
         }
         else
         {
             header("Location: ?user=business&error=incorrect_credentials");
-            exit();
         }
     }
 
