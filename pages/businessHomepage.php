@@ -23,23 +23,12 @@
             border-radius: 10px;
             background-color: #f8f9fa; /* Light gray background */
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Soft shadow */
+            display: none; /* Initially hide */
         }
         .form-title {
             text-align: center;
             margin-bottom: 20px;
         }
-        .form-container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        ..form-container {
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: center;
-        }
-
         .day-operation {
             display: flex;
             justify-content: space-between;
@@ -47,19 +36,92 @@
             width: 100%;
             margin-bottom: 10px; /* Adjust margin as needed */
         }
-
         .sql-data {
             flex-grow: 1;
         }
-
         .edit-form {
             flex-shrink: 0;
         }
-
-
+        .navbar {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .navbar a {
+            margin: 0 10px;
+            text-decoration: none;
+            color: #333;
+            cursor: pointer;
+        }
+        .navbar a.active {
+            font-weight: bold;
+        }
+        .menu-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #f8f9fa;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: none; /* Initially hide */
+            width: 66%; /* 66% of screen width */
+        }
+        .menu-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .menu-table th,
+        .menu-table td {
+            padding: 8px;
+            text-align: left;
+        }
+        .new-item-form {
+            margin-top: 20px; /* Adjust the margin-top value as needed */
+        }
+        .menu-table th:first-child,
+        .menu-table td:first-child {
+            border-top-left-radius: 5px;
+            border-bottom-left-radius: 5px;
+        }
+        .menu-table th:last-child,
+        .menu-table td:last-child {
+            border-top-right-radius: 5px;
+            border-bottom-right-radius: 5px;
+        }
+        #reviews {
+            display: none; /* Initially hidden */
+            width: 66%; /* 66% of screen width */
+            margin-top: 20px; /* Add margin to separate from other sections */
+        }
+        .review-table {
+            width: 100%; /* Ensure the table takes up the full width */
+            table-layout: auto; /* Allow the table to adjust column widths automatically */
+        }
+        .review-table th,
+        .review-table td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            white-space: nowrap; /* Prevent line wrapping */
+            overflow: hidden; /* Hide overflow content */
+            text-overflow: ellipsis; /* Show ellipsis for overflow content */
+        }
+        .smaller-text {
+            font-size: smaller; /* Adjust as needed */
+        }
+        .bigger-text {
+            font-size: larger; /* Adjust as needed */
+        }
     </style>
 </head>
 <body>
+
+<!-- Navigation bar -->
+<div class="navbar">
+    <a href="#" class="active" onclick="toggleSection('about')">About</a>
+    <a href="#" onclick="toggleSection('menu')">Menu</a>
+    <a href="#" onclick="toggleSection('reviews')">Reviews</a>
+</div>
 
 <?php
 // Check if the form is submitted
@@ -94,7 +156,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["editLocationButton"]))
 }
 ?>
 <!-- Business Time of Operation-->
-<div class="form-container">
+<div class="form-container" id="about">
     <h2 class="form-title">Business Time of Operation</h2>
     <?php
     $shop_username = $_SESSION['loggedInUser']; // Replace with the actual shop username
@@ -185,32 +247,89 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["editLocationButton"]))
         <input type="submit" name="editNameButton" value="Update">
     </form>
 </div>
-<!-- See reviews -->
-<div class="form-container">
-    <h2 class="form-title">Reviews</h2>
-    <?php
-    // Prepare and execute SQL query to retrieve reviews for the current shop
-    $sql = "SELECT review_text, rating FROM reviews WHERE shop_username = ?";
-    $stmt = $this->db->dbConnector->prepare($sql);
-    $stmt->bind_param("i", $_SESSION['loggedInUser']);
-    $stmt->execute();
-    $stmt->bind_result($review_text, $rating);
 
-    // Fetch the result
-    while ($stmt->fetch()){
-        echo "<div><div>$review_text</div><div>$rating</div></div>";
-    }
-    $stmt->close();
-    ?>
+<div class="menu-container" id="menu">
+    <h2 class="form-title">Menu</h2>
+    <table class="menu-table">
+        <!-- Table header -->
+        <thead>
+        <tr>
+            <th class="menu-header">Drink Name</th>
+            <th class="menu-header">Price</th>
+            <th class="menu-header">Description</th>
+        </tr>
+        </thead>
+        <!-- Table body -->
+        <tbody>
+        <?php
+        // Query and display the menu items for the shop's parent company
+        $sql = "SELECT drink_id, drink_name, price, description FROM Menu_items WHERE parent_name IN (SELECT parent_name FROM Location_Parent_Company WHERE location_id IN (SELECT location_id FROM Shop_Owner WHERE shop_username = ?))";
+        $stmt = $this->db->dbConnector->prepare($sql);
+        $stmt->bind_param("s", $this->loggedInUser);
+        $stmt->execute();
+        $stmt->bind_result($drink_id, $drink_name, $price, $description);
+        while ($stmt->fetch()) {
+            echo "<tr>";
+            echo "<td>$drink_name</td>";
+            echo "<td>$price</td>";
+            echo "<td>$description</td>";
+            echo "</tr>";
+        }
+        $stmt->close();
+        ?>
+        </tbody>
+    </table>
+    <div class="new-item-form">
+        <!-- Form for inputting new menu items -->
+        <form method="post" action="">
+            <h3>Add/Edit Menu Item</h3>
+            <label for="newDrinkName">Drink Name:</label>
+            <input type="text" id="newDrinkName" name="newDrinkName" required><br>
+            <label for="newPrice">Price:</label>
+            <input type="number" id="newPrice" name="newPrice" step="0.01" required><br>
+            <label for="newDescription">Description:</label>
+            <input type="text" id="newDescription" name="newDescription"><br>
+            <button type="submit" name="addMenuItem">Add Item</button>
+        </form>
+    </div>
 </div>
-</body>
 
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<div id="reviews">
+    <h2>Reviews</h2>
+    <table class="review-table">
+        <thead>
+        <tr>
+            <th class="smaller-text">Customer</th>
+            <th>Rating</th>
+            <th class="bigger-text">Review</th>
+        </tr>
+        </thead>
+        <tbody>
+        <?php
+        // Query the database to retrieve reviews for the shop_username
+        $sql = "SELECT c_username, rating, review_text FROM Reviews WHERE shop_username = ?";
+        $stmt = $this->db->dbConnector->prepare($sql);
+        $stmt->bind_param("s", $this->loggedInUser);
+        $stmt->execute();
+        $stmt->bind_result($c_username, $rating, $review_text);
+        while ($stmt->fetch()) {
+            echo "<tr>";
+            echo "<td class='smaller-text'>$c_username</td>";
+            echo "<td>$rating</td>";
+            echo "<td class='bigger-text'>$review_text</td>";
+            echo "</tr>";
+        }
+        $stmt->close();
+        ?>
+        </tbody>
+    </table>
+</div>
+
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
+        toggleSection('about'); // Automatically toggle into the "About" section on page load
+
         const toggleButtons = document.querySelectorAll(".toggle-edit");
 
         toggleButtons.forEach(button => {
@@ -226,6 +345,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["editLocationButton"]))
             });
         });
     });
+
+    function toggleSection(sectionId) {
+        const sections = document.querySelectorAll('.form-container, .menu-container, #reviews');
+        const navbarLinks = document.querySelectorAll('.navbar a');
+        sections.forEach(function(section) {
+            if (section.id === sectionId) {
+                section.style.display = 'block';
+            } else {
+                section.style.display = 'none';
+            }
+        });
+        navbarLinks.forEach(function(link) {
+            if (link.getAttribute('onclick').includes(sectionId)) {
+                link.classList.add('active');
+            } else {
+                link.classList.remove('active');
+            }
+        });
+    }
 </script>
 
+</body>
 </html>

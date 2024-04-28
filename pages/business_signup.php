@@ -94,11 +94,11 @@ if(isset($_GET['error']) && $_GET['error'] === 'incorrect_credentials') {
                     <label for="city">City</label>
                     <input type="text" class="form-control" id="city" name="city" placeholder="Enter city" required>
                 </div>
-                <div class="form-group col-md-4">
+                <div class="form-group col-md-2">
                     <label for="state">State</label>
                     <input type="text" class="form-control" id="state" name="state" placeholder="Enter state" maxlength="2" required>
                 </div>
-                <div class="form-group col-md-2">
+                <div class="form-group col-md-4">
                     <label for="zipCode">Zip</label>
                     <input type="text" class="form-control" id="zipCode" name="zipCode" placeholder="Zip code" required>
                 </div>
