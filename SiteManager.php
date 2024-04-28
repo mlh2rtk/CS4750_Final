@@ -5,9 +5,8 @@ class SiteManager{
 
     public function __construct(){
         $this->db = new Database();
-        //$this->db->delete_cust();
+        $this->db->drop_tables_if_exists();
         $this->db->make_tables();
-       
     }
     public function run() {
         $user = isset($_GET['user']) ?  $_GET['user'] : 'welcome';

@@ -24,12 +24,28 @@ class Database {
         $this->dbConnector = new mysqli($host, $user, $password, $database, $port);
 
     }
-    public function delete_cust(){
-        $res = $this->dbConnector->query('DROP TABLE Customer;');
+    public function drop_tables_if_exists(){
+        // Drop tables with foreign key constraints referencing Menu_items
+        $this->dbConnector->query('DROP TABLE IF EXISTS Orders_to_Customers;');
+
+        // Drop tables with foreign key constraints referencing Location_Parent_Company
+        $this->dbConnector->query('DROP TABLE IF EXISTS Orders_to_Shops;');
+        //$this->dbConnector->query('DROP TABLE IF EXISTS Shop_Owner;');
+
+        // Drop tables with foreign key constraints referencing Location
+        $this->dbConnector->query('DROP TABLE IF EXISTS Orders;');
+
+        // Drop Customer table
+        //$this->dbConnector->query('DROP TABLE IF EXISTS Customer;');
     }
+
+
+
+
+
     public function make_tables(){
         $res = $this->dbConnector->query('create sequence if not exists userrating_seq;');
-        $res = $this->dbConnector->query(  'CREATE TABLE IF NOT EXISTS `Customer`(first_name VARCHAR(50) NOT NULL, last_name VARCHAR(50) NOT NULL, username VARCHAR(50) NOT NULL, pass VARCHAR(1000) NOT NULL, email VARCHAR(50) NOT NULL, phone VARCHAR(10), PRIMARY KEY(username));');
+        $res = $this->dbConnector->query(  'CREATE TABLE IF NOT EXISTS `Customer`(first_name VARCHAR(50) NOT NULL, last_name VARCHAR(50) NOT NULL, username VARCHAR(50) NOT NULL, pass VARCHAR(500) NOT NULL, email VARCHAR(50) NOT NULL, phone VARCHAR(10), PRIMARY KEY(username));');
         $res = $this->dbConnector->query(  "CREATE TABLE IF NOT EXISTS `Location`(location_id INT AUTO_INCREMENT, state CHAR(2) NOT NULL , zip_code INT NOT NULL CHECK ( zip_code between 0 and 99999) ,street_address VARCHAR(255) NOT NULL, city VARCHAR(100) NOT NULL, PRIMARY KEY(location_id));");
         /// Repeated 3
         $res = $this->dbConnector->query(  "CREATE TABLE IF NOT EXISTS `Shop_Owner` (shop_username VARCHAR(50) NOT NULL, location_id INT, password VARCHAR(500) NOT NULL, PRIMARY KEY(shop_username), FOREIGN KEY (location_id) REFERENCES Location(location_id));");
