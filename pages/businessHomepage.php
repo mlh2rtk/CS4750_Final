@@ -207,7 +207,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["editLocationButton"]))
     ?>
 </div>
 <!-- Update location -->
-<div class="form-container">
+<div class="form-container" id="about">
     <h2 class="form-title">Business Location</h2>
     <?php
     //$location_id = $_SESSION['locationID'];
@@ -239,7 +239,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["editLocationButton"]))
     </form>
 </div>
 <!-- Update name of business -->
-<div class="form-container">
+<div class="form-container" id="about">
     <h2 class="form-title">Business Name</h2>
     <form method="post" action=''>
         <label for="businessName">Business Name:</label><br>
