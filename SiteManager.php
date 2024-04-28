@@ -134,9 +134,10 @@ class SiteManager{
         $statement->fetch();
 
         //correct password
-        if(password_verify($_POST['loginPassword'], $pass) == true)
+        if(password_verify($_POST['loginPassword'], $pass))
         {
-            $this->loggedInUser = $_POST['loginUsername'];
+            $_SESSION['loggedInUser'] = $_POST['loginUsername'];
+            //$this->loggedInUser = $_POST['loginUsername'];
             header("Location: ?user=business&command=homepage");
         }
         else
