@@ -3,7 +3,7 @@ class SiteManager{
     public $db;
     public function __construct(){
         $this->db = new Database();
-        $this->db->delete_cust();
+        //$this->db->delete_cust();
         $this->db->make_tables();
        
     }
@@ -53,8 +53,17 @@ class SiteManager{
         $statement->bind_result($pass);
         $statement->execute();
         $statement->fetch();
-        var_dump($pass);
-        var_dump(password_verify($_POST['loginPassword'], $pass));
+
+        //correct password
+        if(password_verify($_POST['loginPassword'], $pass) == true)
+        {
+            // open customerView
+        }
+        else
+        {
+            header("Location: ?user=customer&error=incorrect_credentials");
+            exit();
+        }
     }
     function split_screen_customer(){
         include('pages/customer_signup.php');
@@ -69,10 +78,53 @@ class SiteManager{
     function handle_business(){
         $command = isset($_GET['command']) ?  $_GET['command'] : 'home';
         switch ($command){
+            case 'signup':
+                //$this->customer_signup();
+                break;
+            case 'login':
+                //$this->customer_login();
+                break;
             case 'home':
                 $this->split_screen_business();
+                break;
+            case 'homepage':
+
+                break;
         }
     }
+
+    function business_signup(){
+
+
+        /*
+        $statement = $this->db->dbConnector->prepare("INSERT INTO Shop_Owner(first_name, last_name, username, pass, email, phone)
+                                   VALUES (?, ?, ?, ?, ?, ?);");
+        $pass = password_hash($_POST['signupPassword'], PASSWORD_DEFAULT);
+        $statement->bind_param('ssssss', $_POST['firstName'], $_POST['lastName'], $_POST['signupUsername'], $pass, $_POST['email'], $_POST['phone']);
+        $statement->execute();
+        $statement->close();
+        header('Location: ?user=business&command=homepage');*/
+
+    }
+    function business_login(){
+        $statement = $this->db->dbConnector->prepare("SELECT pass FROM Shop_Owner WHERE shop_username=? ;");
+        $statement->bind_param('s',$_POST['loginUsername']);
+        $statement->bind_result($pass);
+        $statement->execute();
+        $statement->fetch();
+
+        //correct password
+        if(password_verify($_POST['loginPassword'], $pass) == true)
+        {
+            // open businessView
+        }
+        else
+        {
+            header("Location: ?user=business&error=incorrect_credentials");
+            exit();
+        }
+    }
+
     function split_screen_business(){
         include('pages/business_signup.php');
     }
