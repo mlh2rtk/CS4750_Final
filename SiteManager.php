@@ -57,7 +57,7 @@ class SiteManager{
         //correct password
         if(password_verify($_POST['loginPassword'], $pass) == true)
         {
-            // open customerView
+            header("Location: ?user=customer&command=homepage");
         }
         else
         {
@@ -79,10 +79,10 @@ class SiteManager{
         $command = isset($_GET['command']) ?  $_GET['command'] : 'home';
         switch ($command){
             case 'signup':
-                //$this->customer_signup();
+                $this->business_signup();
                 break;
             case 'login':
-                //$this->customer_login();
+                $this->business_login();
                 break;
             case 'home':
                 $this->split_screen_business();
@@ -95,19 +95,33 @@ class SiteManager{
 
     function business_signup(){
 
+        // Prepare SQL statement to insert data into Location table
+        $location_statement = $this->db->dbConnector->prepare("INSERT INTO Location (state, zip_code, street_address, city) VALUES (?, ?, ?, ?)");
+        $location_statement->bind_param('siss', $_POST['state'], $_POST['zipCode'], $_POST['address'], $_POST['city']);
+        $location_statement->execute();
+        $location_id = $location_statement->insert_id; // Get the auto-generated location_id
 
-        /*
-        $statement = $this->db->dbConnector->prepare("INSERT INTO Shop_Owner(first_name, last_name, username, pass, email, phone)
-                                   VALUES (?, ?, ?, ?, ?, ?);");
+        // Prepare SQL statement to insert data into Shop_Owner table
+        $shop_owner_statement = $this->db->dbConnector->prepare("INSERT INTO Shop_Owner (shop_username, location_id, password) VALUES (?, ?, ?)");
         $pass = password_hash($_POST['signupPassword'], PASSWORD_DEFAULT);
-        $statement->bind_param('ssssss', $_POST['firstName'], $_POST['lastName'], $_POST['signupUsername'], $pass, $_POST['email'], $_POST['phone']);
-        $statement->execute();
-        $statement->close();
-        header('Location: ?user=business&command=homepage');*/
+        $shop_owner_statement->bind_param('sis', $_POST['signupUsername'], $location_id, $pass);
+        $shop_owner_statement->execute();
+
+        // Prepare SQL statement to insert data into Location_Parent_Company table
+        $location_parent_statement = $this->db->dbConnector->prepare("INSERT INTO Location_Parent_Company (parent_name, location_id) VALUES (?, ?)");
+        $location_parent_statement->bind_param('si', $_POST['companyName'], $location_id);
+        $location_parent_statement->execute();
+
+        // Close prepared statements
+        $location_statement->close();
+        $shop_owner_statement->close();
+        $location_parent_statement->close();
+
+        header('Location: ?user=business&command=homepage');
 
     }
     function business_login(){
-        $statement = $this->db->dbConnector->prepare("SELECT pass FROM Shop_Owner WHERE shop_username=? ;");
+        $statement = $this->db->dbConnector->prepare("SELECT password FROM Shop_Owner WHERE shop_username=? ;");
         $statement->bind_param('s',$_POST['loginUsername']);
         $statement->bind_result($pass);
         $statement->execute();
@@ -116,7 +130,7 @@ class SiteManager{
         //correct password
         if(password_verify($_POST['loginPassword'], $pass) == true)
         {
-            // open businessView
+            header("Location: ?user=business&command=homepage");
         }
         else
         {

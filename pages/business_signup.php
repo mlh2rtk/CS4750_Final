@@ -57,14 +57,14 @@ if(isset($_GET['error']) && $_GET['error'] === 'incorrect_credentials') {
 <div class="form-section">
     <div class="form-container">
         <h2 class="form-title">Login</h2>
-        <form id="loginForm" action="?command=check_login&user=business" method="post">
+        <form id="loginForm" action="?command=login&user=business" method="post">
             <div class="form-group">
                 <label for="loginUsername">Username</label>
-                <input type="text" class="form-control" id="loginUsername" placeholder="Enter username" required>
+                <input type="text" class="form-control" id="loginUsername" name="loginUsername" placeholder="Enter username" required>
             </div>
             <div class="form-group">
                 <label for="loginPassword">Password</label>
-                <input type="password" class="form-control" id="loginPassword" placeholder="Enter password" required>
+                <input type="password" class="form-control" id="loginPassword" name="loginPassword" placeholder="Enter password" required>
             </div>
             <button type="submit" class="btn btn-primary">Login</button>
         </form>
@@ -75,39 +75,38 @@ if(isset($_GET['error']) && $_GET['error'] === 'incorrect_credentials') {
         <form id="signupForm" action="?command=signup&user=business" method="post">
             <div class="form-group">
                 <label for="signupUsername">Username</label>
-                <input type="text" class="form-control" id="signupUsername" placeholder="Enter username" required>
+                <input type="text" class="form-control" id="signupUsername" name="signupUsername" placeholder="Enter username" required>
             </div>
             <div class="form-group">
                 <label for="signupPassword">Password</label>
-                <input type="password" class="form-control" id="signupPassword" placeholder="Enter password" required>
+                <input type="password" class="form-control" id="signupPassword" name="signupPassword" placeholder="Enter password" required>
             </div>
             <div class="form-group">
                 <label for="companyName">Company Name</label>
-                <input type="text" class="form-control" id="companyName" placeholder="Enter company name" required>
+                <input type="text" class="form-control" id="companyName" name="companyName" placeholder="Enter company name" required>
             </div>
             <div class="form-group">
                 <label for="address">Address</label>
-                <input type="text" class="form-control" id="address" placeholder="Enter street address" required>
+                <input type="text" class="form-control" id="address" name="address" placeholder="Enter street address" required>
             </div>
             <div class="form-row">
                 <div class="form-group col-md-6">
                     <label for="city">City</label>
-                    <input type="text" class="form-control" id="city" placeholder="Enter city" required>
+                    <input type="text" class="form-control" id="city" name="city" placeholder="Enter city" required>
                 </div>
                 <div class="form-group col-md-4">
                     <label for="state">State</label>
-                    <input type="text" class="form-control" id="state" placeholder="Enter state" required>
+                    <input type="text" class="form-control" id="state" name="state" placeholder="Enter state" maxlength="2" required>
                 </div>
                 <div class="form-group col-md-2">
                     <label for="zipCode">Zip</label>
-                    <input type="text" class="form-control" id="zipCode" placeholder="Zip code" required>
+                    <input type="text" class="form-control" id="zipCode" name="zipCode" placeholder="Zip code" required>
                 </div>
             </div>
             <button type="submit" class="btn btn-primary">Sign Up</button>
         </form>
     </div>
 </div>
-
 <script>
     document.getElementById('loginForm').addEventListener('submit', function(event) {
         var username = document.getElementById('loginUsername').value.trim();
@@ -122,7 +121,6 @@ if(isset($_GET['error']) && $_GET['error'] === 'incorrect_credentials') {
     document.getElementById('signupForm').addEventListener('submit', function(event) {
         var username = document.getElementById('signupUsername').value.trim();
         var password = document.getElementById('signupPassword').value.trim();
-        var confirmPassword = document.getElementById('confirmPassword').value.trim();
         var companyName = document.getElementById('companyName').value.trim();
         var address = document.getElementById('address').value.trim();
         var city = document.getElementById('city').value.trim();
