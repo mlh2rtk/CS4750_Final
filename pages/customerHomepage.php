@@ -82,33 +82,56 @@
     <a href="#" class="active" onclick="toggleSection('profile')">Profile</a>
     <a href="#" onclick="toggleSection('searchDrink')">Search Drink</a>
     <a href="#" onclick="toggleSection('searchCompany')">Search Company</a>
+    <a href="#" onclick="toggleSection('reviews')">Reviews</a>
 </div>
 
+<!-- Profile Section -->
 <div class="form-container" id="profile">
-    <h2 class="form-title">Profile</h2>
-    <!-- Profile content goes here -->
+    <!-- Profile content will be dynamically loaded here via PHP -->
 </div>
 
+<!-- Search Drink Section -->
 <div class="form-container" id="searchDrink">
     <h2 class="form-title">Search Drink</h2>
     <div class="search-bar-container">
         <div class="search-bar">
-            <input type="text" placeholder="Search Drink...">
+            <input type="text" id="drinkSearchInput" placeholder="Search Drink...">
         </div>
-        <button type="button">Search</button>
+        <button type="button" onclick="searchDrink()">Search</button>
     </div>
-    <!-- Search drink content goes here -->
+    <div id="searchResults"></div> <!-- This div will display search results -->
 </div>
 
+<!-- Search Company Section -->
 <div class="form-container" id="searchCompany">
     <h2 class="form-title">Search Company</h2>
     <div class="search-bar-container">
         <div class="search-bar">
-            <input type="text" placeholder="Search Company...">
+            <input type="text" id="companySearchInput" placeholder="Search Company...">
         </div>
-        <button type="button">Search</button>
+        <button type="button" onclick="searchCompany()">Search</button>
     </div>
-    <!-- Search company content goes here -->
+    <div id="searchCompanyResults"></div> <!-- This div will display search results -->
+</div>
+
+<!-- Reviews Section -->
+<div class="form-container" id="reviews">
+    <h2 class="form-title">Write a Review</h2>
+    <form id="reviewForm">
+        <div class="form-group">
+            <label for="shopUsername">Shop Username:</label>
+            <input type="text" id="shopUsername" name="shopUsername" placeholder="Enter shop username" required>
+        </div>
+        <div class="form-group">
+            <label for="reviewText">Review Text:</label>
+            <textarea id="reviewText" name="reviewText" placeholder="Enter your review" required></textarea>
+        </div>
+        <div class="form-group">
+            <label for="rating">Rating (0-5):</label>
+            <input type="number" id="rating" name="rating" min="0" max="5" required>
+        </div>
+        <button type="submit">Submit Review</button>
+    </form>
 </div>
 
 <script>
@@ -134,6 +157,74 @@
             }
         });
     }
+
+    // Function to handle drink search
+    function searchDrink() {
+        const searchTerm = document.getElementById('drinkSearchInput').value.trim();
+
+        // Make AJAX request to search for drinks
+        if (searchTerm !== '') {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', `search_drink.php?q=${encodeURIComponent(searchTerm)}`, true);
+
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    document.getElementById('searchResults').innerHTML = xhr.responseText;
+                } else {
+                    console.error('Request failed. Status:', xhr.status);
+                }
+            };
+
+            xhr.send();
+        } else {
+            alert('Please enter a search term.');
+        }
+    }
+
+    // Function to handle company search
+    function searchCompany() {
+        const searchTerm = document.getElementById('companySearchInput').value.trim();
+
+        // Make AJAX request to search for companies
+        if (searchTerm !== '') {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', `search_company.php?q=${encodeURIComponent(searchTerm)}`, true);
+
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    document.getElementById('searchCompanyResults').innerHTML = xhr.responseText;
+                } else {
+                    console.error('Request failed. Status:', xhr.status);
+                }
+            };
+
+            xhr.send();
+        } else {
+            alert('Please enter a search term.');
+        }
+    }
+
+    // Function to handle review submission
+    document.getElementById('reviewForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent default form submission
+
+        const formData = new FormData(this);
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', 'submit_review.php', true);
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                alert('Review submitted successfully!');
+                // Clear form fields after successful submission (optional)
+                document.getElementById('shopUsername').value = '';
+                document.getElementById('reviewText').value = '';
+                document.getElementById('rating').value = '';
+            } else {
+                alert('Failed to submit review. Please try again.');
+            }
+        };
+        xhr.send(formData);
+    });
 </script>
 
 </body>
