@@ -212,6 +212,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["editLocationButton"]))
     <?php
     //$location_id = $_SESSION['locationID'];
     // Prepare and execute SQL query to retrieve address for the current location_id
+    function 
     $sql = "SELECT state, zip_code, street_address, city FROM location JOIN location_parent_company ON location.location_id=location_parent_company.location_id WHERE parent_name = ?";
     $stmt = $this->db->dbConnector->prepare($sql);
     $stmt->bind_param("i", $_SESSION['loggedInUser']);
@@ -266,8 +267,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["editLocationButton"]))
         $sql = "SELECT drink_id, drink_name, price, description FROM Menu_items WHERE parent_name IN (SELECT parent_name FROM Location_Parent_Company WHERE location_id IN (SELECT location_id FROM Shop_Owner WHERE shop_username = ?))";
         $stmt = $this->db->dbConnector->prepare($sql);
         $stmt->bind_param("s", $this->loggedInUser);
-        $stmt->execute();
+        var_dump($_SESSION['loggedInUser']);
         $stmt->bind_result($drink_id, $drink_name, $price, $description);
+        $stmt->execute();
+        
         while ($stmt->fetch()) {
             echo "<tr>";
             echo "<td>$drink_name</td>";

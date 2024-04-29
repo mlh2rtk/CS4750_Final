@@ -49,6 +49,7 @@ class SiteManager{
         $statement->execute();
         $statement->close();
         $this->loggedInUser = $_POST['signupUsername'];
+        $_SESSION['loggedInUser'] = $_POST['signupUsername'];
         header('Location: ?user=customer&command=homepage');
 
     }
@@ -58,11 +59,13 @@ class SiteManager{
         $statement->bind_result($pass);
         $statement->execute();
         $statement->fetch();
+        var_dump($pass);
 
         //correct password
         if(password_verify($_POST['loginPassword'], $pass) == true)
         {
             $this->loggedInUser = $_POST['loginUsername'];
+            $_SESSION['loggedInUser'] = $_POST['loginUsername'];
             header("Location: ?user=customer&command=homepage");
         }
         else
@@ -123,6 +126,7 @@ class SiteManager{
         $location_parent_statement->close();
 
         $this->loggedInUser = $_POST['signupUsername'];
+        $_SESSION['loggedInUser'] = $_POST['signupUsername'];
         header('Location: ?user=business&command=homepage');
 
     }
@@ -161,7 +165,7 @@ class SiteManager{
      * @return bool True if the review was successfully added, false otherwise.
      */
     public function writeReview($customerUsername, $shopUsername, $reviewText, $rating) {
-        $stmt = $this->dbConnector->prepare("INSERT INTO Reviews (c_username, shop_username, review_text, rating) VALUES (?, ?, ?, ?)");
+        $stmt = $this->db->dbConnector->prepare("INSERT INTO Reviews (c_username, shop_username, review_text, rating) VALUES (?, ?, ?, ?)");
         $stmt->bind_param("sssi", $customerUsername, $shopUsername, $reviewText, $rating);
         $result = $stmt->execute();
         $stmt->close();
@@ -177,7 +181,7 @@ class SiteManager{
      * @return array|null An array of drink details if found, null otherwise.
      */
     public function searchDrink($drinkName) {
-        $stmt = $this->dbConnector->prepare("SELECT * FROM Menu_items WHERE drink_name = ?");
+        $stmt = $this->db->dbConnector->prepare("SELECT * FROM Menu_items WHERE drink_name = ?");
         $stmt->bind_param("s", $drinkName);
         $stmt->execute();
         $result = $stmt->get_result();
