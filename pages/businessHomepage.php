@@ -177,7 +177,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["editNameButton"])) {
     $_SESSION['loggedInUser'] = $businessName;
 }
 
-// Check if menu form is submitted
+// Check if add menu item form is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["addMenuItem"])) {
     // Retrieve the form data
     $newDrinkName = $_POST['newDrinkName'];
@@ -188,6 +188,62 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["addMenuItem"])) {
     $sql = "INSERT INTO menu_items (drink_name, price, description, parent_name) VALUES (?, ?, ?, ?)";
     $stmt = $this->db->dbConnector->prepare($sql);
     $stmt->bind_param("sdss", $newDrinkName, $newPrice, $newDescription, $_SESSION['loggedInUser']);
+    $stmt->execute();
+    $stmt->close();
+}
+
+// Check if update menu item form is submitted
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["updateMenuItem"])) {
+    // Retrieve the form data
+    $drinkName = $_POST['drinkNames'];
+    $newPrice = $_POST['newPrice'];
+    $newDescription = $_POST['newDescription'];
+
+    // Update menu_items table
+    $sql = "UPDATE menu_items SET price = ?, description = ? WHERE drink_name = ? AND parent_name = ? ";
+    $stmt = $this->db->dbConnector->prepare($sql);
+    $stmt->bind_param("dsss", $newPrice, $newDescription, $drinkName, $_SESSION['loggedInUser']);
+    $stmt->execute();
+    $stmt->close();
+}
+
+// Check if delete menu item form is submitted
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["deleteMenuItem"])) {
+    // Retrieve the form data
+    $drinkName = $_POST['drinkNames'];
+
+    // Update menu_items table
+    $sql = "DELETE FROM menu_items WHERE drink_name = ? AND parent_name = ?";
+    $stmt = $this->db->dbConnector->prepare($sql);
+    $stmt->bind_param("ss", $drinkName, $_SESSION['loggedInUser']);
+    $stmt->execute();
+    $stmt->close();
+}
+
+// Check if update price form is submitted
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["updatePrice"])) {
+    // Retrieve the form data
+    $drinkName = $_POST['drinkNames'];
+    $newPrice = $_POST['newPrice'];
+
+    // Update menu_items table
+    $sql = "UPDATE menu_items SET price = ? WHERE drink_name = ? AND parent_name = ?";
+    $stmt = $this->db->dbConnector->prepare($sql);
+    $stmt->bind_param("dss", $newPrice, $drinkName, $_SESSION['loggedInUser']);
+    $stmt->execute();
+    $stmt->close();
+}
+
+// Check if update description item form is submitted
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["updateDescription"])) {
+    // Retrieve the form data
+    $drinkName = $_POST['drinkNames'];
+    $newDescription = $_POST['newDescription'];
+
+    // Update menu_items table
+    $sql = "UPDATE menu_items SET description = ? WHERE drink_name = ? AND parent_name = ?";
+    $stmt = $this->db->dbConnector->prepare($sql);
+    $stmt->bind_param("sss", $newDescription, $drinkName, $_SESSION['loggedInUser']);
     $stmt->execute();
     $stmt->close();
 }
@@ -330,6 +386,39 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["addMenuItem"])) {
             <input type="text" id="newDescription" name="newDescription"><br>
             <button type="submit" name="addMenuItem">Add Item</button>
         </form>
+    </div><br>
+    <div class="update-delete-menu-form">
+        <?php
+        $sql = "SELECT drink_name FROM menu_items WHERE parent_name = ?";
+        $stmt = $this->db->dbConnector->prepare($sql);
+        $stmt->bind_param("i", $_SESSION['loggedInUser']);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        // Get drink names and store in array
+        $drinkNames = [];
+        while ($row = $result->fetch_assoc()) {
+            $drinkNames[] = $row['drink_name'];
+        }
+        $stmt->close();
+        ?>
+        <form method="post" action="">
+            <h3>Edit Menu Item</h3>
+            <label for="drinkNames">Select a Drink:</label>
+            <select name="drinkNames" id="drinkNames">
+                <?php foreach ($drinkNames as $drinkName) : ?>
+                    <option value="<?php echo $drinkName; ?>"><?php echo $drinkName; ?></option>
+                <?php endforeach; ?>
+            </select><br>
+            <label for="newPrice">Price:</label>
+            <input type="number" id="newPrice" name="newPrice" step="0.01" value="0" required>
+            <button type="submit" name="updatePrice">Update Price</button><br>
+            <label for="newDescription">Description:</label>
+            <input type="text" id="newDescription" name="newDescription">
+            <button type="submit" name="updateDescription">Update Description</button><br>
+            <button type="submit" name="updateMenuItem">Update All</button>
+            <button type="submit" name="deleteMenuItem">Delete Item</button>
+        </form>
     </div>
 </div>
 
@@ -346,9 +435,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["addMenuItem"])) {
         <tbody>
         <?php
         // Query the database to retrieve reviews for the shop_username
-        $sql = "SELECT c_username, rating, review_text FROM Reviews WHERE shop_username = ?";
+        $sql = "SELECT c_username, rating, review_text FROM reviews WHERE shop_username = ?";
         $stmt = $this->db->dbConnector->prepare($sql);
-        $stmt->bind_param("s", $this->loggedInUser);
+        $stmt->bind_param("s", $_SESSION['loggedInUser']);
         $stmt->execute();
         $stmt->bind_result($c_username, $rating, $review_text);
         while ($stmt->fetch()) {
