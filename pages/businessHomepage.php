@@ -124,7 +124,7 @@
 </div>
 
 <?php
-// Check if the form is submitted
+// Check if time of operation form is submitted
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["editButton"])) {
     // Retrieve form data
     $dayOfWeek = $_POST["dayOfWeek"];
@@ -139,6 +139,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["editButton"])) {
     $stmt->close();
 }
 
+// Check if location form is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["editLocationButton"])) {
     // Retrieve the form data
     $streetAddress = $_POST['streetAddress'];
@@ -146,14 +147,52 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["editLocationButton"]))
     $state = $_POST['state'];
     $zip = $_POST['zip'];
 
-    // Perform any necessary validation or database updates here
-    // For this example, we'll just display the updated location
+    // Update location table
     $sql = "REPLACE INTO location (location_id, state, zip_code, street_address, city) VALUES (?, ?, ?, ?, ?)";
     $stmt = $this->db->dbConnector->prepare($sql);
     $stmt->bind_param("isiss", $location_id, $state, $zip, $streetAddress, $city);
     $stmt->execute();
     $stmt->close();
 }
+
+// Check if name form is submitted
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["editNameButton"])) {
+    // Retrieve the form data
+    $businessName = $_POST['businessName'];
+
+    // Update shop_owner table
+    $sql = "UPDATE shop_owner SET shop_username = ? WHERE shop_username = ?";
+    $stmt = $this->db->dbConnector->prepare($sql);
+    $stmt->bind_param("ss", $businessName, $_SESSION['loggedInUser']);
+    $stmt->execute();
+    // Update location_parent_company table
+    $sql2 = "UPDATE location_parent_company SET parent_name = ? WHERE parent_name = ?";
+    $stmt2 = $this->db->dbConnector->prepare($sql2);
+    $stmt2->bind_param("ss", $businessName, $_SESSION['loggedInUser']);
+    $stmt2->execute();
+
+    $stmt->close();
+    $stmt2->close();
+
+    $_SESSION['loggedInUser'] = $businessName;
+}
+
+// Check if menu form is submitted
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["addMenuItem"])) {
+    // Retrieve the form data
+    $newDrinkName = $_POST['newDrinkName'];
+    $newPrice = $_POST['newPrice'];
+    $newDescription = $_POST['newDescription'];
+
+    // Update menu_items table
+    $sql = "INSERT INTO menu_items (drink_name, price, description, parent_name) VALUES (?, ?, ?, ?)";
+    $stmt = $this->db->dbConnector->prepare($sql);
+    $stmt->bind_param("sdss", $newDrinkName, $newPrice, $newDescription, $_SESSION['loggedInUser']);
+    $stmt->execute();
+    $stmt->close();
+}
+
+// Check if reviews form is submitted
 ?>
 <!-- Business Time of Operation-->
 <div class="form-container" id="about">
@@ -265,7 +304,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["editLocationButton"]))
         // Query and display the menu items for the shop's parent company
         $sql = "SELECT drink_id, drink_name, price, description FROM Menu_items WHERE parent_name IN (SELECT parent_name FROM Location_Parent_Company WHERE location_id IN (SELECT location_id FROM Shop_Owner WHERE shop_username = ?))";
         $stmt = $this->db->dbConnector->prepare($sql);
-        $stmt->bind_param("s", $this->loggedInUser);
+        $stmt->bind_param("s", $_SESSION['loggedInUser']);
         $stmt->execute();
         $stmt->bind_result($drink_id, $drink_name, $price, $description);
         while ($stmt->fetch()) {
@@ -282,7 +321,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["editLocationButton"]))
     <div class="new-item-form">
         <!-- Form for inputting new menu items -->
         <form method="post" action="">
-            <h3>Add/Edit Menu Item</h3>
+            <h3>Add Menu Item</h3>
             <label for="newDrinkName">Drink Name:</label>
             <input type="text" id="newDrinkName" name="newDrinkName" required><br>
             <label for="newPrice">Price:</label>
