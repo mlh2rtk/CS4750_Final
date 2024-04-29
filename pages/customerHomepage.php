@@ -97,6 +97,33 @@
 </head>
 <body>
 
+<?php
+// Check if add to cart form is submitted
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["addCart"])) {
+    // Retrieve the form data
+    $drinkName = $_POST['drinkName'];
+    $description = $_POST['description'];
+    $price = $_POST['price'];
+    $parentName = $_POST['parentName'];
+    $drinkId = $_POST['drinkId'];
+    error_log($drinkId);
+    // Update orders table
+    $sql = "INSERT INTO orders (drink_id) VALUES (?)";
+    $stmt = $this->db->dbConnector->prepare($sql);
+    $stmt->bind_param("i", $drinkId);
+    $stmt->execute();
+    $orderId = $stmt->insert_id;
+    $stmt->close();
+
+    // Update orders to customers
+    $sql = "INSERT INTO orders_to_customers (order_id, drink_id) VALUES (?, ?)";
+    $stmt = $this->db->dbConnector->prepare($sql);
+    $stmt->bind_param("ii", $orderId, $drinkId);
+    $stmt->execute();
+    $stmt->close();
+}
+?>
+
 <!-- Navigation bar -->
 <div class="navbar">
     <a href="#" class="active" onclick="toggleSection('profile')">Profile</a>
