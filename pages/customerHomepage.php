@@ -73,6 +73,26 @@
             color: #fff;
             cursor: pointer;
         }
+
+        .review-table {
+            width: 100%; /* Ensure the table takes up the full width */
+            table-layout: auto; /* Allow the table to adjust column widths automatically */
+        }
+        .review-table th,
+        .review-table td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            white-space: nowrap; /* Prevent line wrapping */
+            overflow: hidden; /* Hide overflow content */
+            text-overflow: ellipsis; /* Show ellipsis for overflow content */
+        }
+        .smaller-text {
+            font-size: smaller; /* Adjust as needed */
+        }
+        .bigger-text {
+            font-size: larger; /* Adjust as needed */
+        }
     </style>
 </head>
 <body>
@@ -88,6 +108,42 @@
 <!-- Profile Section -->
 <div class="form-container" id="profile">
     <!-- Profile content will be dynamically loaded here via PHP -->
+    <!-- Cart -->
+    <div id="cart">
+
+    </div>
+    <!-- review -->
+    <div id="reviews">
+        <h2>Your Reviews</h2>
+        <table class="review-table">
+            <thead>
+            <tr>
+                <th class="smaller-text">Customer</th>
+                <th>Rating</th>
+                <th class="bigger-text">Review</th>
+            </tr>
+            </thead>
+            <tbody>
+            <?php
+            // Query the database to retrieve reviews for the shop_username
+            $sql = "SELECT shop_username, rating, review_text FROM reviews WHERE c_username = ?";
+            $stmt = $this->db->dbConnector->prepare($sql);
+            $stmt->bind_param("s", $_SESSION['loggedInUser']);
+            $stmt->execute();
+            $stmt->bind_result($shop_username, $rating, $review_text);
+            while ($stmt->fetch()) {
+                echo "<tr>";
+                echo "<td class='smaller-text'>$shop_username</td>";
+                echo "<td>$rating</td>";
+                echo "<td class='bigger-text'>$review_text</td>";
+                echo "</tr>";
+            }
+            $stmt->close();
+            ?>
+            </tbody>
+        </table>
+        <br><br>
+    </div>
 </div>
 
 <!-- Search Drink Section -->
@@ -95,7 +151,7 @@
     <h2 class="form-title">Search Drink</h2>
     <div class="search-bar-container">
         <div class="search-bar">
-            <input type="text" id="drinkSearchInput" placeholder="Search Drink...">
+            <input type="text" id="drinkSearchInput" name="drinkSearchInput" placeholder="Search Drink...">
         </div>
         <button type="button" onclick="searchDrink()">Search</button>
     </div>
@@ -130,8 +186,13 @@
             <label for="rating">Rating (0-5):</label>
             <input type="number" id="rating" name="rating" min="0" max="5" required>
         </div>
+        <input type="hidden" id="c_username" name="c_username" value="<?php echo $_SESSION['loggedInUser']?>">
         <button type="submit">Submit Review</button>
     </form>
+</div>
+
+<div>
+    <a class="nav-link" href="?">Log out</a>
 </div>
 
 <script>
@@ -165,7 +226,7 @@
         // Make AJAX request to search for drinks
         if (searchTerm !== '') {
             const xhr = new XMLHttpRequest();
-            xhr.open('GET', `search_drink.php?q=${encodeURIComponent(searchTerm)}`, true);
+            xhr.open('GET', `pages/search_drink.php?q=${encodeURIComponent(searchTerm)}`, true);
 
             xhr.onload = function() {
                 if (xhr.status === 200) {
@@ -188,7 +249,7 @@
         // Make AJAX request to search for companies
         if (searchTerm !== '') {
             const xhr = new XMLHttpRequest();
-            xhr.open('GET', `search_company.php?q=${encodeURIComponent(searchTerm)}`, true);
+            xhr.open('GET', `pages/search_company.php?q=${encodeURIComponent(searchTerm)}`, true);
 
             xhr.onload = function() {
                 if (xhr.status === 200) {
@@ -211,7 +272,7 @@
         const formData = new FormData(this);
 
         const xhr = new XMLHttpRequest();
-        xhr.open('POST', 'submit_review.php', true);
+        xhr.open('POST', 'pages/submit_review.php', true);
         xhr.onload = function() {
             if (xhr.status === 200) {
                 alert('Review submitted successfully!');
