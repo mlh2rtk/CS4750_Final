@@ -73,6 +73,26 @@
             color: #fff;
             cursor: pointer;
         }
+
+        .review-table {
+            width: 100%; /* Ensure the table takes up the full width */
+            table-layout: auto; /* Allow the table to adjust column widths automatically */
+        }
+        .review-table th,
+        .review-table td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            white-space: nowrap; /* Prevent line wrapping */
+            overflow: hidden; /* Hide overflow content */
+            text-overflow: ellipsis; /* Show ellipsis for overflow content */
+        }
+        .smaller-text {
+            font-size: smaller; /* Adjust as needed */
+        }
+        .bigger-text {
+            font-size: larger; /* Adjust as needed */
+        }
     </style>
 </head>
 <body>
@@ -82,33 +102,97 @@
     <a href="#" class="active" onclick="toggleSection('profile')">Profile</a>
     <a href="#" onclick="toggleSection('searchDrink')">Search Drink</a>
     <a href="#" onclick="toggleSection('searchCompany')">Search Company</a>
+    <a href="#" onclick="toggleSection('reviews')">Reviews</a>
 </div>
 
+<!-- Profile Section -->
 <div class="form-container" id="profile">
-    <h2 class="form-title">Profile</h2>
-    <!-- Profile content goes here -->
+    <!-- Profile content will be dynamically loaded here via PHP -->
+    <!-- Cart -->
+    <div id="cart">
+
+    </div>
+    <!-- review -->
+    <div id="reviews">
+        <h2>Your Reviews</h2>
+        <table class="review-table">
+            <thead>
+            <tr>
+                <th class="smaller-text">Customer</th>
+                <th>Rating</th>
+                <th class="bigger-text">Review</th>
+            </tr>
+            </thead>
+            <tbody>
+            <?php
+            // Query the database to retrieve reviews for the shop_username
+            $sql = "SELECT shop_username, rating, review_text FROM reviews WHERE c_username = ?";
+            $stmt = $this->db->dbConnector->prepare($sql);
+            $stmt->bind_param("s", $_SESSION['loggedInUser']);
+            $stmt->execute();
+            $stmt->bind_result($shop_username, $rating, $review_text);
+            while ($stmt->fetch()) {
+                echo "<tr>";
+                echo "<td class='smaller-text'>$shop_username</td>";
+                echo "<td>$rating</td>";
+                echo "<td class='bigger-text'>$review_text</td>";
+                echo "</tr>";
+            }
+            $stmt->close();
+            ?>
+            </tbody>
+        </table>
+        <br><br>
+    </div>
 </div>
 
+<!-- Search Drink Section -->
 <div class="form-container" id="searchDrink">
     <h2 class="form-title">Search Drink</h2>
     <div class="search-bar-container">
         <div class="search-bar">
-            <input type="text" placeholder="Search Drink...">
+            <input type="text" id="drinkSearchInput" name="drinkSearchInput" placeholder="Search Drink...">
         </div>
-        <button type="button">Search</button>
+        <button type="button" onclick="searchDrink()">Search</button>
     </div>
-    <!-- Search drink content goes here -->
+    <div id="searchResults"></div> <!-- This div will display search results -->
 </div>
 
+<!-- Search Company Section -->
 <div class="form-container" id="searchCompany">
     <h2 class="form-title">Search Company</h2>
     <div class="search-bar-container">
         <div class="search-bar">
-            <input type="text" placeholder="Search Company...">
+            <input type="text" id="companySearchInput" placeholder="Search Company...">
         </div>
-        <button type="button">Search</button>
+        <button type="button" onclick="searchCompany()">Search</button>
     </div>
-    <!-- Search company content goes here -->
+    <div id="searchCompanyResults"></div> <!-- This div will display search results -->
+</div>
+
+<!-- Reviews Section -->
+<div class="form-container" id="reviews">
+    <h2 class="form-title">Write a Review</h2>
+    <form id="reviewForm">
+        <div class="form-group">
+            <label for="shopUsername">Shop Username:</label>
+            <input type="text" id="shopUsername" name="shopUsername" placeholder="Enter shop username" required>
+        </div>
+        <div class="form-group">
+            <label for="reviewText">Review Text:</label>
+            <textarea id="reviewText" name="reviewText" placeholder="Enter your review" required></textarea>
+        </div>
+        <div class="form-group">
+            <label for="rating">Rating (0-5):</label>
+            <input type="number" id="rating" name="rating" min="0" max="5" required>
+        </div>
+        <input type="hidden" id="c_username" name="c_username" value="<?php echo $_SESSION['loggedInUser']?>">
+        <button type="submit">Submit Review</button>
+    </form>
+</div>
+
+<div>
+    <a class="nav-link" href="?">Log out</a>
 </div>
 
 <script>
@@ -134,6 +218,74 @@
             }
         });
     }
+
+    // Function to handle drink search
+    function searchDrink() {
+        const searchTerm = document.getElementById('drinkSearchInput').value.trim();
+
+        // Make AJAX request to search for drinks
+        if (searchTerm !== '') {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', `pages/search_drink.php?q=${encodeURIComponent(searchTerm)}`, true);
+
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    document.getElementById('searchResults').innerHTML = xhr.responseText;
+                } else {
+                    console.error('Request failed. Status:', xhr.status);
+                }
+            };
+
+            xhr.send();
+        } else {
+            alert('Please enter a search term.');
+        }
+    }
+
+    // Function to handle company search
+    function searchCompany() {
+        const searchTerm = document.getElementById('companySearchInput').value.trim();
+
+        // Make AJAX request to search for companies
+        if (searchTerm !== '') {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', `pages/search_company.php?q=${encodeURIComponent(searchTerm)}`, true);
+
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    document.getElementById('searchCompanyResults').innerHTML = xhr.responseText;
+                } else {
+                    console.error('Request failed. Status:', xhr.status);
+                }
+            };
+
+            xhr.send();
+        } else {
+            alert('Please enter a search term.');
+        }
+    }
+
+    // Function to handle review submission
+    document.getElementById('reviewForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent default form submission
+
+        const formData = new FormData(this);
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', 'pages/submit_review.php', true);
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                alert('Review submitted successfully!');
+                // Clear form fields after successful submission (optional)
+                document.getElementById('shopUsername').value = '';
+                document.getElementById('reviewText').value = '';
+                document.getElementById('rating').value = '';
+            } else {
+                alert('Failed to submit review. Please try again.');
+            }
+        };
+        xhr.send(formData);
+    });
 </script>
 
 </body>

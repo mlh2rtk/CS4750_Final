@@ -48,6 +48,7 @@ class SiteManager{
         $statement->bind_param('ssssss', $_POST['firstName'], $_POST['lastName'], $_POST['signupUsername'], $pass, $_POST['email'], $_POST['phone']);
         $statement->execute();
         $statement->close();
+        $_SESSION['loggedInUser'] = $_POST['signupUsername'];
         $this->loggedInUser = $_POST['signupUsername'];
         $_SESSION['loggedInUser'] = $_POST['signupUsername'];
         header('Location: ?user=customer&command=homepage');
@@ -64,6 +65,7 @@ class SiteManager{
         //correct password
         if(password_verify($_POST['loginPassword'], $pass) == true)
         {
+            $_SESSION['loggedInUser'] = $_POST['loginUsername'];
             $this->loggedInUser = $_POST['loginUsername'];
             $_SESSION['loggedInUser'] = $_POST['loginUsername'];
             header("Location: ?user=customer&command=homepage");
@@ -125,6 +127,7 @@ class SiteManager{
         $shop_owner_statement->close();
         $location_parent_statement->close();
 
+        $_SESSION['loggedInUser'] = $_POST['signupUsername'];
         $this->loggedInUser = $_POST['signupUsername'];
         $_SESSION['loggedInUser'] = $_POST['signupUsername'];
         header('Location: ?user=business&command=homepage');
