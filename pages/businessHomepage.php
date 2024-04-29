@@ -321,7 +321,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["updateDescription"])) 
     <?php
     //$location_id = $_SESSION['locationID'];
     // Prepare and execute SQL query to retrieve address for the current location_id
-    function 
     $sql = "SELECT state, zip_code, street_address, city FROM location JOIN location_parent_company ON location.location_id=location_parent_company.location_id WHERE parent_name = ?";
     $stmt = $this->db->dbConnector->prepare($sql);
     $stmt->bind_param("s", $_SESSION['businessName']);

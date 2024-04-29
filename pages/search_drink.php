@@ -3,14 +3,14 @@ include('../Database.php');
 include('../Config.php');
 
 // Retrieve the search term from the AJAX request
-$drinkSearch = $_GET['q'];
+$businessSearch = $_GET['q'];
 
 // Perform the search query
 $db = new Database();
 $sql = "SELECT drink_name, price, description, parent_name FROM menu_items WHERE drink_name LIKE ?";
 $stmt = $db->dbConnector->prepare($sql);
-$drinkSearch = "%" . $drinkSearch . "%";
-$stmt->bind_param("s", $drinkSearch);
+$businessSearch = "%" . $businessSearch . "%";
+$stmt->bind_param("s", $businessSearch);
 $stmt->execute();
 $result = $stmt->get_result();
 
