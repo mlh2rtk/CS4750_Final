@@ -122,8 +122,21 @@
     <a href="#" onclick="toggleSection('menu')">Menu</a>
     <a href="#" onclick="toggleSection('reviews')">Reviews</a>
 </div>
+<div>
+    <h4>Welcome, <?php echo $_SESSION['loggedInUser']?></h4>
+</div>
 
 <?php
+// Fetches company name for the logged in user
+$sql = "SELECT parent_name FROM location_parent_company WHERE location_id = (SELECT location_id FROM shop_owner WHERE shop_username = ?)";
+$stmt = $this->db->dbConnector->prepare($sql);
+$stmt->bind_param("s", $_SESSION['loggedInUser']);
+$stmt->execute();
+$stmt->bind_result($businessName);
+$stmt->fetch();
+$stmt->close();
+$_SESSION['businessName'] = $businessName;
+
 // Check if time of operation form is submitted
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["editButton"])) {
     // Retrieve form data
@@ -147,10 +160,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["editLocationButton"]))
     $state = $_POST['state'];
     $zip = $_POST['zip'];
 
-    // Update location table
-    $sql = "REPLACE INTO location (location_id, state, zip_code, street_address, city) VALUES (?, ?, ?, ?, ?)";
+    // Get location_id
+    $sql = "SELECT location_id FROM shop_owner WHERE shop_username = ?";
     $stmt = $this->db->dbConnector->prepare($sql);
-    $stmt->bind_param("isiss", $location_id, $state, $zip, $streetAddress, $city);
+    $stmt->bind_param("s", $_SESSION['loggedInUser']);
+    $stmt->execute();
+    $stmt->bind_result($location_id);
+    $stmt->fetch();
+    $stmt->close();
+
+    // Update location table
+    $sql = "UPDATE location SET state = ?, zip_code = ?, street_address = ?, city = ? WHERE location_id = ?";
+    $stmt = $this->db->dbConnector->prepare($sql);
+    $stmt->bind_param("sissi", $state, $zip, $streetAddress, $city, $location_id);
     $stmt->execute();
     $stmt->close();
 }
@@ -160,21 +182,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["editNameButton"])) {
     // Retrieve the form data
     $businessName = $_POST['businessName'];
 
-    // Update shop_owner table
-    $sql = "UPDATE shop_owner SET shop_username = ? WHERE shop_username = ?";
-    $stmt = $this->db->dbConnector->prepare($sql);
-    $stmt->bind_param("ss", $businessName, $_SESSION['loggedInUser']);
-    $stmt->execute();
     // Update location_parent_company table
-    $sql2 = "UPDATE location_parent_company SET parent_name = ? WHERE parent_name = ?";
-    $stmt2 = $this->db->dbConnector->prepare($sql2);
-    $stmt2->bind_param("ss", $businessName, $_SESSION['loggedInUser']);
-    $stmt2->execute();
+    $sql = "UPDATE location_parent_company SET parent_name = ? WHERE parent_name = ?";
+    $stmt = $this->db->dbConnector->prepare($sql);
+    $stmt->bind_param("ss", $businessName, $_SESSION['businessName']);
+    $stmt->execute();
 
     $stmt->close();
-    $stmt2->close();
 
-    $_SESSION['loggedInUser'] = $businessName;
+    $_SESSION['businessName'] = $businessName;
 }
 
 // Check if add menu item form is submitted
@@ -187,7 +203,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["addMenuItem"])) {
     // Update menu_items table
     $sql = "INSERT INTO menu_items (drink_name, price, description, parent_name) VALUES (?, ?, ?, ?)";
     $stmt = $this->db->dbConnector->prepare($sql);
-    $stmt->bind_param("sdss", $newDrinkName, $newPrice, $newDescription, $_SESSION['loggedInUser']);
+    $stmt->bind_param("sdss", $newDrinkName, $newPrice, $newDescription, $_SESSION['businessName']);
     $stmt->execute();
     $stmt->close();
 }
@@ -202,7 +218,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["updateMenuItem"])) {
     // Update menu_items table
     $sql = "UPDATE menu_items SET price = ?, description = ? WHERE drink_name = ? AND parent_name = ? ";
     $stmt = $this->db->dbConnector->prepare($sql);
-    $stmt->bind_param("dsss", $newPrice, $newDescription, $drinkName, $_SESSION['loggedInUser']);
+    $stmt->bind_param("dsss", $newPrice, $newDescription, $drinkName, $_SESSION['businessName']);
     $stmt->execute();
     $stmt->close();
 }
@@ -215,7 +231,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["deleteMenuItem"])) {
     // Update menu_items table
     $sql = "DELETE FROM menu_items WHERE drink_name = ? AND parent_name = ?";
     $stmt = $this->db->dbConnector->prepare($sql);
-    $stmt->bind_param("ss", $drinkName, $_SESSION['loggedInUser']);
+    $stmt->bind_param("ss", $drinkName, $_SESSION['businessName']);
     $stmt->execute();
     $stmt->close();
 }
@@ -229,7 +245,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["updatePrice"])) {
     // Update menu_items table
     $sql = "UPDATE menu_items SET price = ? WHERE drink_name = ? AND parent_name = ?";
     $stmt = $this->db->dbConnector->prepare($sql);
-    $stmt->bind_param("dss", $newPrice, $drinkName, $_SESSION['loggedInUser']);
+    $stmt->bind_param("dss", $newPrice, $drinkName, $_SESSION['businessName']);
     $stmt->execute();
     $stmt->close();
 }
@@ -243,12 +259,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["updateDescription"])) 
     // Update menu_items table
     $sql = "UPDATE menu_items SET description = ? WHERE drink_name = ? AND parent_name = ?";
     $stmt = $this->db->dbConnector->prepare($sql);
-    $stmt->bind_param("sss", $newDescription, $drinkName, $_SESSION['loggedInUser']);
+    $stmt->bind_param("sss", $newDescription, $drinkName, $_SESSION['businessName']);
     $stmt->execute();
     $stmt->close();
 }
-
-// Check if reviews form is submitted
 ?>
 <!-- Business Time of Operation-->
 <div class="form-container" id="about">
@@ -309,7 +323,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["updateDescription"])) 
     // Prepare and execute SQL query to retrieve address for the current location_id
     $sql = "SELECT state, zip_code, street_address, city FROM location JOIN location_parent_company ON location.location_id=location_parent_company.location_id WHERE parent_name = ?";
     $stmt = $this->db->dbConnector->prepare($sql);
-    $stmt->bind_param("i", $_SESSION['loggedInUser']);
+    $stmt->bind_param("s", $_SESSION['businessName']);
     $stmt->execute();
     $stmt->bind_result($state, $zip, $streetAddress, $city);
 
@@ -338,7 +352,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["updateDescription"])) 
     <h2 class="form-title">Business Name</h2>
     <form method="post" action=''>
         <label for="businessName">Business Name:</label><br>
-        <input type="text" id="businessName" name="businessName" value="<?php echo $_SESSION['loggedInUser']; ?>"><br><br>
+        <input type="text" id="businessName" name="businessName" value="<?php echo $_SESSION['businessName']; ?>"><br><br>
         <input type="submit" name="editNameButton" value="Update">
     </form>
 </div>
@@ -391,7 +405,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["updateDescription"])) 
         <?php
         $sql = "SELECT drink_name FROM menu_items WHERE parent_name = ?";
         $stmt = $this->db->dbConnector->prepare($sql);
-        $stmt->bind_param("i", $_SESSION['loggedInUser']);
+        $stmt->bind_param("s", $_SESSION['businessName']);
         $stmt->execute();
         $result = $stmt->get_result();
 
@@ -451,8 +465,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["updateDescription"])) 
         ?>
         </tbody>
     </table>
+    <br><br>
 </div>
 
+<div>
+    <a class="nav-link" href="?">Log out</a>
+</div>
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {

@@ -122,6 +122,7 @@ class SiteManager{
         $shop_owner_statement->close();
         $location_parent_statement->close();
 
+        $_SESSION['loggedInUser'] = $_POST['signupUsername'];
         $this->loggedInUser = $_POST['signupUsername'];
         header('Location: ?user=business&command=homepage');
 
